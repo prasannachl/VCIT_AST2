@@ -10,10 +10,12 @@ pipeline{
                 git branch: 'main', credentialsId: 'javahome2', url: 'https://github.com/prasannachl/VCIT_AST2.git'
             }
         }
-        stage("Maven Build"){
-            steps{
-                sh "mvn clean package"
+         stage('Build') {
+            steps {
+                dir("/var/lib/jenkins/workspace/tomcatdeploy") {
+                sh 'mvn -f POM.xml clean package'
                 sh "mv target/*.war target/myweb.war"
+                }    
             }
         }
         stage("deploy-dev"){
