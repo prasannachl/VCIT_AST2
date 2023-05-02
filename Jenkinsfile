@@ -14,8 +14,7 @@ pipeline{
             steps {
                 dir("/var/lib/jenkins/workspace/tomcatdeploy") {
                 sh 'mvn -f POM.xml clean package'
-                sh 'mvn clean package'    
-                sh "mv target/*.war target/myweb.war"
+                sh "mv target/*.jar target/myweb.jar"
                 }    
             }
         }
@@ -23,7 +22,7 @@ pipeline{
             steps{
                 sshagent(['tomcat-new']) {
                 sh """
-                    scp -o StrictHostKeyChecking=no target/myweb.war  ec2-user@172.31.9.186:/home/ec2-user/apache-tomcat-9.0.74/webapps/
+                    scp -o StrictHostKeyChecking=no target/myweb.jar  ec2-user@172.31.9.186:/home/ec2-user/apache-tomcat-9.0.74/webapps/
                     
                     ssh ec2-user@172.31.9.186 /home/ec2-user/apache-tomcat-9.0.74/bin/shutdown.sh
                     
