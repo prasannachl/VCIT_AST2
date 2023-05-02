@@ -14,6 +14,7 @@ pipeline{
             steps {
                 dir("/var/lib/jenkins/workspace/tomcatdeploy") {
                 sh 'mvn -f POM.xml clean package'
+                sh 'mvn clean package'    
                 sh "mv target/*.war target/myweb.war"
                 }    
             }
