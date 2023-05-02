@@ -1,30 +1,35 @@
-pipeline {
+pipeline{
     agent any
-    tools {
-        maven "maven"
-        jdk "JDK"
+    
+    environment{
+        PATH = "/opt/maven3/bin:$PATH"
     }
-    stages {
-        stage('Initialize'){
+    stages{
+        stage("Git Checkout"){
             steps{
-                echo "PATH = ${M2_HOME}/bin:${PATH}"
-                echo "M2_HOME = /opt/maven"
+                git credentialsId: 'javahome2', url: 'https://github.com/srinivas1987devops/myweb.git'
             }
         }
-        stage('Build') {
-            steps {
-                dir("/var/lib/jenkins/workspace/pipelinemaven") {
-                sh 'mvn -f POM.xml clean package'
-                }
+        stage("Maven Build"){
+            steps{
+                sh "mvn clean package"
+                sh "mv target/*.war target/myweb.war"
             }
         }
-     }
-    post {
-       always {
-          junit(
-        allowEmptyResults: true,
-        testResults: '*/test-reports/.xml'
-      )
-      }
-   } 
+        stage("deploy-dev"){
+            steps{
+                sshagent(['tomcat-new']) {
+                sh """
+                    scp -o StrictHostKeyChecking=no target/myweb.war  ec2-user@172.31.10.233:/home/ec2-user/apache-tomcat-9.0.64/webapps/
+                    
+                    ssh ec2-user@172.31.10.233 /home/ec2-user/apache-tomcat-9.0.64/bin/shutdown.sh
+                    
+                    ssh ec2-user@172.31.10.233 /home/ec2-user/apache-tomcat-9.0.64/bin/startup.sh
+                
+                """
+            }
+            
+            }
+        }
+    }
 }
